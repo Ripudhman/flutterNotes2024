@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/utilities/show_error_dialog.dart';
 import 'dart:developer' as devtools show log;
+import 'package:flutter_application_1/views/constants/routes.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -77,15 +79,17 @@ class _LoginViewState extends State<LoginView> {
                     .signInWithEmailAndPassword(
                         email: email, password: password);
                 Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/notes/', (route) => false);
+                    .pushNamedAndRemoveUntil(notesRoute, (route) => false);
               } on FirebaseAuthException catch (e) {
                 if (e.code == "user-not-found") {
-                  devtools.log('User not Found');
+                  await showErrorDiglog(context, "User Not Found");
+                } else if (e.code == "wrong-password") {
+                  await showErrorDiglog(context, "Wrong Password");
                 } else {
-                  if (e.code == "wrong-password") {
-                    devtools.log("Wrong Password");
-                  }
+                  await showErrorDiglog(context, "Error: ${e.code}");
                 }
+              } catch (e) {
+                await showErrorDiglog(context, e.toString());
               }
             },
             child: const Text(
@@ -95,7 +99,7 @@ class _LoginViewState extends State<LoginView> {
           TextButton(
             onPressed: () {
               Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/register/', (route) => false);
+                  .pushNamedAndRemoveUntil(registerRoute, (route) => false);
             },
             child: const Text("Not Register yet? Register Here!"),
           ),
