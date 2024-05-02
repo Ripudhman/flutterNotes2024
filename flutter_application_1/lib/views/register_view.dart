@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/constants/routes.dart';
 import 'package:flutter_application_1/utilities/show_error_dialog.dart';
-import 'package:flutter_application_1/views/constants/routes.dart';
+
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
