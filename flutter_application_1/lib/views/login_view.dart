@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/services/auth/auth_exception.dart';
+import 'package:flutter_application_1/services/auth/auth_services.dart';
 import 'package:flutter_application_1/utilities/show_error_dialog.dart';
-import 'dart:developer' as devtools show log;
 import 'package:flutter_application_1/constants/routes.dart';
 
 class LoginView extends StatefulWidget {
@@ -75,27 +75,31 @@ class _LoginViewState extends State<LoginView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                final userCredential = await FirebaseAuth.instance
-                    .signInWithEmailAndPassword(
-                        email: email, password: password);
-                final user = FirebaseAuth.instance.currentUser;
-                if (user?.emailVerified ?? false) {
+                final userCredential = await AuthService.firebase()
+                    .logIn(email: email, password: password);
+                final user = AuthService.firebase().currentUser;
+                if (user?.isEmailVerified ?? false) {
                   Navigator.of(context)
                       .pushNamedAndRemoveUntil(notesRoute, (route) => false);
                 } else {
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       verifyEmailRoute, (route) => false);
                 }
-              } on FirebaseAuthException catch (e) {
-                if (e.code == "user-not-found") {
-                  await showErrorDiglog(context, "User Not Found");
-                } else if (e.code == "wrong-password") {
-                  await showErrorDiglog(context, "Wrong Password");
-                } else {
-                  await showErrorDiglog(context, "Error: ${e.code}");
-                }
-              } catch (e) {
-                await showErrorDiglog(context, e.toString());
+              } on UserNotFoundAuthException {
+                await showErrorDiglog(
+                  context,
+                  "User Not Found",
+                );
+              } on WrongPassworAuthException {
+                await showErrorDiglog(
+                  context,
+                  "Wrong Password",
+                );
+              } on GenericAuthException {
+                await showErrorDiglog(
+                  context,
+                  'Authentication error',
+                );
               }
             },
             child: const Text(
